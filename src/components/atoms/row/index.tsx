@@ -18,6 +18,6 @@ export const Row = (props: props) => {
 const styles = StyleSheet.create({
     contentContainerStyle: {
         flexDirection:'row',
-        
+        alignItems:'center'
     }
 })

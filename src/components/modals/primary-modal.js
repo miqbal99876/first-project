@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import * as SVG from '../../assets/icons/index'
-import Modal from 'react-native-modal'
-import { mvs } from 'config/metrices';
-import Bold from 'typography/bold-text';
-import { PrimaryButton } from 'components/atoms/buttons';
-import { colors } from 'config/colors';
+
+
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import Modal from 'react-native-modal';
+import { colors } from '../../config/colors';
+import { mvs } from '../../config/metrices';
+import Bold from '../typography/bold-text';
 const PrimaryModal = ({ buttonTitle = 'Dispatch Button',
     visible = false,
     choosePhotoFromLibrary,
