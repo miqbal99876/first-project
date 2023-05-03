@@ -1,17 +1,19 @@
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { NavigationContainer } from '@react-navigation/native';
-
 import * as React from 'react';
-import BiitScreen from '../../screens/biit';
+import CustomDrawer from '../../components/customDrawer';
+import Home from '../../screens/home';
 
 const Drawer = createDrawerNavigator();
 
  export const MyDrawer=()=> {
   return (
-    <NavigationContainer>
-    <Drawer.Navigator>
-      <Drawer.Screen name="BiitScreen" component={BiitScreen} />
+    <Drawer.Navigator initialRouteName='Home' drawerContent={props => <CustomDrawer {...props} />}>
+      <Drawer.Screen
+        name="Home"
+        component={Home}
+        options={{headerShown: false}}
+      />
     </Drawer.Navigator>
-</NavigationContainer>
   );
 }
+

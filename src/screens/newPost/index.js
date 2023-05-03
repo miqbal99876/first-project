@@ -1,6 +1,6 @@
 //import liraries
-import React, {useState} from 'react';
-import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
+import React, {useState,useEffect} from 'react';
+import {View, Text, StyleSheet, Image, TouchableOpacity, TextInput} from 'react-native';
 import {colors} from '../../config/colors';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Octicons from 'react-native-vector-icons/Octicons';
@@ -10,6 +10,7 @@ import {mvs} from '../../config/metrices';
 import DropDownPicker from 'react-native-dropdown-picker';
 import PrimaryModal from '../../components/modals/primary-modal';
 import ImagePicker from 'react-native-image-crop-picker';
+import IP from '../IP';
 const SECTIONS = [
     { label: 'BSCS', value: 'BSCS' },
     { label: 'BSIT', value: 'BSIT' },
@@ -23,12 +24,21 @@ const SECTIONS = [
     { label: 'Engineering', value: 'Engineering' },
   ];
 // create a component
-const NewPost = () => {
+const NewPost = ({navigation}) => {
+  const [desc, setDesc] = useState('');
+
     const [open, setOpen] = useState(false);
-    const [value, setValue] = useState(null);
+    const [value, setValue] = useState(null);console.log(value);
     const [model,setModal]=useState(false)
     const [image, setImage] = useState(null);
+    const [upload, setUpload] = useState(null);console.log(global.user.CNIC);
     const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
+    const currentDate = new Date();
+
+    const day = currentDate.getDate();
+  const month = currentDate.getMonth() + 1; // Month is zero-indexed, so we add 1 to get the actual month value
+  const year = currentDate.getFullYear();
+    console.log( day+"-"+month+"-"+year);
     const fromGallery = () => {
         ImagePicker.openPicker({
         //   width: 400,
@@ -39,9 +49,16 @@ const NewPost = () => {
           mediaType: 'photo',
           
         }).then((image) => {
+          console.log('image object ',image);
           setImage(image.path);
           setImageDimensions({ width: image.width, height: image.height });
           setModal(false)
+          var filename = image.path.substring(image.path.lastIndexOf('/')+1);
+       setUpload( {
+        uri: image.path,
+        namee:filename,
+        type: image.mime
+      })  
         });
       };
       const fromCamera = () => {
@@ -56,6 +73,37 @@ const NewPost = () => {
 
         });
       };
+const uploadPosts=()=>{
+  var formdata = new FormData();
+  formdata.append("postedBy", global.user.CNIC);
+  formdata.append("postFor", value);
+  formdata.append("description", desc);
+  formdata.append("dateTime", day+"-"+month+"-"+year);
+  formdata.append("type", global.user.userType);
+  formdata.append("fromWall", global.user.userType);
+  formdata.append("user", global.user.name);
+  formdata.append("image", upload);
+  
+  var requestOptions = {
+    method: 'POST',
+    body: formdata,
+    redirect: 'follow'
+  };
+  
+  fetch(IP.IP+"Post/addPost", requestOptions)
+    .then(response => response.json())
+    .then(result =>{
+      console.log(result);
+    } )
+    .catch(error => console.log('error', error));
+}
+
+useEffect(()=>{
+
+},[])
+
+
+
   return (
     <View style={styles.container}>
       {/* header is started */}
@@ -64,33 +112,26 @@ const NewPost = () => {
         <Text style={{color: colors.black, fontWeight: 'bold'}}>New Post</Text>
         <Octicons name={'plus'} size={25} color={colors.black} />
         <View style={styles.btn}>
+<TouchableOpacity onPress={uploadPosts}>
           <Text style={{color: colors.white}}>Post</Text>
+          </TouchableOpacity>
         </View>
       </Row>
       {/* header is just sleeped          */}
       {/* body */}
       <View style={{paddingHorizontal: 16}}>
-        <View
-          style={{
-            height: mvs(200),
-            backgroundColor: colors.DEFAULT_GREY,
-            marginTop: 16,
-            opacity: 0.5,
-            paddingTop: 30,
-            paddingHorizontal: 10,
-            borderRadius: 10,
-          }}>
-          <Text
-            style={{
-              color: colors.black,
-              fontWeight: 'bold',
-              fontSize: mvs(18),
-              opacity: 1,
-            }}>
-            What's on Your Mind
-          </Text>
+        <View style={{marginTop:16}}>
+            <TextInput
+        multiline
+        numberOfLines={4} // Set the initial number of lines
+        style={styles.textInput}
+        placeholder="Enter your text here..."
+        placeholderTextColor={colors.black}
+        value={desc}
+        onChangeText={(str)=>setDesc(str)}
+      />
         </View>
-      <View style={{marginTop:16,backgroundColor: colors.black}}>
+      <View style={{marginTop:16}}>
         {image?(
              <Image
              source={{uri:image}}
@@ -125,6 +166,7 @@ const NewPost = () => {
         <Ionicons name='camera-outline'size={35}color={colors.black}/>
         <Text style={{marginLeft:10,color:colors.black,fontWeight:'bold'}}>Click Here To Choose</Text>
      </TouchableOpacity>
+     
 
    <PrimaryModal visible={model} choosePhotoFromLibrary={()=>{setModal(false),fromGallery()}}
    takePhotoFromCamera={()=>{setModal(false),fromCamera()}} />
@@ -152,5 +194,18 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  textInput: {
+    height: 200,
+    width: '100%',
+    // borderColor: 'gray',
+    // borderWidth: 1,
+    backgroundColor:'gray',
+    opacity:0.5,
+    padding: 20,
+    textAlignVertical:'top',
+    fontSize:18,
+    borderRadius:10,
+    fontWeight:'bold'
   },
 });

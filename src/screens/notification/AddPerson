@@ -1,0 +1,71 @@
+import { View, Text, Image, Button, KeyboardAvoidingView, TouchableOpacity, TextInput, FlatList } from 'react-native'
+import React, { useState } from 'react'
+import { mvs, ms, s } from 'react-native-size-matters'
+import { SafeAreaView } from "react-native-safe-area-context"
+import styles from './notificationStyles'
+import colors from '../../assets/colors/colors'
+import Icons from '../../assets/icons/icons'
+const Notifiations = ({ navigation }) => {
+
+    let data = [{ id: 1, value: "Nazeed like your photo", type: 1 },
+    { id: 2, value: "ALI like your photo", type: 1 },
+    { id: 3, value: "ALI commit on your photo", type: 2 },
+    { id: 4, value: "Imran send you a freind requiest", type: 3 },
+
+
+
+    ]
+
+
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <View style={{ flexDirection: "row", padding: 10, alignItems: 'center' }}>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <Icons.Ionicons name={'arrow-back'} size={40} color={colors.black} />
+                </TouchableOpacity>
+                <Text style={{ color: colors.black, marginLeft: mvs(50), textAlign: 'center', fontSize: 20 }}>Notifiations</Text>
+            </View>
+            <FlatList
+                data={data}
+                renderItem={({ item }) => {
+                    return (
+
+                        <View style={{
+                            width: 370, height: 100,
+                            backgroundColor: 'white', elevation: 4,
+                            marginTop: 10, alignSelf: 'center', borderRadius: 10, flexDirection: 'row', alignItems: 'center'
+                        }}>
+                            <Image source={require('../../assets/photos/LOGO.jpeg')} style={{ width: 60, height: 60, marginLeft: 10 }} />
+                            <View>
+                                <Text style={{ fontSize: 17, color: 'black', marginLeft: 10 }}>
+                                    {item.value}
+                                </Text>
+                                {
+                                    item.type == 3 ?
+                                        <View style={{ flexDirection: 'row',marginTop:10 }}>
+                                            <TouchableOpacity style={{alignItems:'center',justifyContent:'center', width: 100, height: 40, backgroundColor: 'red', marginLeft: 20 }}>
+                                                <Text style={{ alignSelf: 'center', color: 'white' }}>
+                                                    Reject
+                                                </Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity style={{ alignItems:'center',justifyContent:'center',width: 100, height: 40, backgroundColor: 'green', marginLeft: 20 }}>
+                                                <Text style={{ alignSelf: 'center', color: 'white' }}>
+                                                    Accept
+                                                </Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                        : null
+                                }
+                            </View>
+                        </View>
+
+                    )
+                }
+                }
+            />
+        </SafeAreaView>
+    )
+}
+
+export default Notifiations
