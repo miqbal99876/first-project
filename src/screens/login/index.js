@@ -9,14 +9,13 @@ import { Row } from '../../components/atoms/row';
 import { colors } from '../../config/colors';
 import IP from '../IP';
 import styles from './styles';
-import { log } from 'react-native-reanimated';
+
 
 // create a component
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loder, setLoder] = useState(false);
-  console.log(IP,'ip')
 
   const sendToLogin = async () => {
     if (email == '') {
@@ -24,7 +23,7 @@ const Login = ({ navigation }) => {
       return;
     }
     else if (password == '') {
-      alert("Enter email")
+      alert("Enter password")
       return;
     } else {
       var myHeaders = new Headers();
@@ -34,7 +33,7 @@ const Login = ({ navigation }) => {
         "CNIC": email,
         "password": password
       });
-
+      
       var requestOptions = {
         method: 'POST',
         headers: myHeaders,
@@ -42,17 +41,18 @@ const Login = ({ navigation }) => {
         redirect: 'follow'
       };
 
-      console.log('IP.IP>>>>>', IP.IP);
+      // console.log('IP.IP>>>>>', IP.IP);
 
-      await fetch(IP.IP + "User/LoginUser", requestOptions)
+      await fetch(IP.IP +"User/LoginUser", requestOptions)
         .then(response => response.json())
-        .then(result => {
+        .then(result => { console.log(result);
           if(result.statusCode==300)
           {
             alert(result.message)
             return
           }
           global.user = result?.user;
+          global.result=result
 
           navigation.navigate('Drawer')
 
@@ -66,7 +66,7 @@ const Login = ({ navigation }) => {
     <View style={styles.container}>
       {/* body  */}
       <Image source={require('../../assets/images/logo.jpg')} style={{ alignSelf: 'center', width: 100, height: 100, marginTop: 10 }} />
-      <Text style={styles.logo}>BIIT SOCIO</Text>
+      <Text style={styles.logo}>BIIT SOCIAL</Text>
       <View style={styles.innercontainer}>
 
         <Text style={styles.login}>Login</Text>

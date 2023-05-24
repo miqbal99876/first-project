@@ -1,11 +1,13 @@
 //import liraries
 import React, { useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
 import HomeHeader from '../../components/atoms/homeHeader';
 import { Row } from '../../components/atoms/row';
 import { colors } from '../../config/colors';
 import { mvs } from '../../config/metrices';
+import IP from '../IP';
+import { useIsFocused } from '@react-navigation/native';
 
 
 
@@ -13,25 +15,52 @@ import { mvs } from '../../config/metrices';
 const SocietiesScreen = ({navigation,route}) => {
   const [search,setSearch]=useState('');
   const [selected,setSelected]=useState();
-  console.log('seeeeeeeeee',selected);
+  const [societies,setSocities]=useState([]);console.log(societies);
+  
 
   const roll=route?.params
 
   const screenMapping = {
     'BIIT': 'BiitScreen',
-    'Personal': 'PersonalScreen',
+    'Personal': 'Personal',
     'Societies': 'SocietiesScreen',
     'Calendar': 'CalendarScreen',
     'Class': 'ClassScreen',
-    'Student': 'StudentScreen',
+    
   };
   useEffect(()=>{
-    const roll=route?.params;
-    setSelected(roll)
+    const roll=route?.params?.index;
+    setSelected(roll);
+// console.log('rollllllllllll',roll);
+    getSocietiesDetail();
   },[])
-    return (
+
+  const getSocietiesDetail=()=>{
+    var requestOptions = {
+      method: 'GET',
+      redirect: 'follow'
+    };
+    
+    fetch(IP.IP +"Post/getSocietiesDetail", requestOptions)
+      .then(response => response.json())
+      .then(result => setSocities(result))
+      .catch(error => console.log('error', error));
+  }
+  const renderItem = ({ item }) => (
+    <View style={{alignItems:'center',marginTop:30
+    }}>
+      <Image
+                    source={{ uri: 'http://192.168.0.116/BiitSocioApis/Images/3230440894009.jpg'}}
+                    style={{ width:80, height: 70, backgroundColor: 'black' }}
+
+
+                  />
+      <Text>{item.name}</Text>
+    </View>
+  );
+ return (
       <View style={styles.container}>
-        <HomeHeader />
+        <HomeHeader  navigation={navigation}/>
         <Row style={{alignItems: 'center', marginHorizontal: 16}}>
           <TouchableOpacity style={{marginRight: 5}}>
             <View
@@ -48,16 +77,16 @@ const SocietiesScreen = ({navigation,route}) => {
             </View>
             <Text style={{fontSize: 12}}>Your Story</Text>
           </TouchableOpacity>
-          {[1, 2, 3].map((it, index) => (
-            <View key={index} style={{marginHorizontal: 5, marginTop: 20}}>
-              <Image
-                source={require('../../assets/coffees/imag2.jpg')}
-                style={{height: 80, width: 70, borderRadius: 15}}
-              />
-              <Text>Programing</Text>
-            </View>
-          ))}
+          <View>
+          <FlatList
+      data={societies}
+      keyExtractor={(society) => society.id.toString()}
+      renderItem={renderItem}
+      horizontal
+    />
+    </View>
         </Row>
+    
         <View
           style={{
             position: 'absolute',
@@ -71,8 +100,7 @@ const SocietiesScreen = ({navigation,route}) => {
               'Societies',
               'Calendar',
               'Class',
-              'Student',
-            ].map((item, index) => (
+         ].map((item, index) => (
               <TouchableOpacity
                 onPress={() => {
                   setSelected(index);

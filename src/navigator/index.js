@@ -21,6 +21,15 @@ import AddMembers from '../screens/addmembers';
 import { MyDrawer } from './drawar';
 import ChatScreen from '../screens/chatscreen';
 import CreateGroup from '../screens/createGroup';
+import Personal from '../screens/personal';
+import Friends from '../screens/friends';
+import AddFriends from '../screens/add-friends';
+import PermissionScreen from '../screens/give-permission';
+import Users from '../screens/users';
+import ClassScreen from '../screens/class';
+import GroupDetail from '../screens/Group-details/group-detail';
+import BottomTabBar from './bottom-tab/bottomTabBar';
+
 const Stack = createNativeStackNavigator();
 
 function Navigators() {
@@ -31,7 +40,7 @@ function Navigators() {
         <Stack.Screen name="ForgetPassword" component={ForgetPassword} />
         <Stack.Screen name="OtpScreen" component={OtpScreen} />
         <Stack.Screen name="NewPassword" component={NewPassword} />
-        <Stack.Screen name="Home" component={Home} />
+        {/* <Stack.Screen name="Home" component={Home} /> */}
         <Stack.Screen name="SocietiesScreen" component={SocietiesScreen} />
         <Stack.Screen name="BiitScreen" component={BiitScreen} />
         <Stack.Screen name="CalendarScreen" component={CalendarScreen} />
@@ -44,6 +53,16 @@ function Navigators() {
         <Stack.Screen name="Drawer" component={MyDrawer} />
         <Stack.Screen name="ChatScreen" component={ChatScreen} />
         <Stack.Screen name="CreateGroup" component={CreateGroup} />
+        {/* <Stack.Screen name="Personal" component={Personal} /> */}
+        <Stack.Screen name="Friends" component={Friends} />
+        <Stack.Screen name="AddFriends" component={AddFriends} />
+        <Stack.Screen name="PermissionScreen" component={PermissionScreen} />
+        <Stack.Screen name="Users" component={Users} />
+        <Stack.Screen name="ClassScreen" component={ClassScreen} />
+        <Stack.Screen name="GroupDetail" component={GroupDetail} />
+
+
+
 
         
         {/* <Stack.Screen name="Drawer" component={MyDrawer} /> */}

@@ -14,6 +14,7 @@ import AllPost from '../../components/allpost';
 const Profile = () => {
     const [isEnabled, setIsEnabled] = useState(false);
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+    console.log('userrrr',global.result.countFriends);
     return (
       <View style={styles.container}>
         <Row
@@ -66,10 +67,10 @@ const Profile = () => {
               fontSize: 20,
               fontWeight: 'bold',
             }}>
-            Shahid
+          {global?.user?.name}
           </Text>
           <Text style={{alignSelf: 'center', color: colors.black}}>
-            shahid@gmail.com
+            {global?.user?.email}
           </Text>
         </View>
         <Row style={{justifyContent: 'space-evenly', marginTop: mvs(20)}}>
@@ -77,14 +78,14 @@ const Profile = () => {
             <Text>Post</Text>
             <Text
               style={{color: colors.black, fontSize: 20, fontWeight: 'bold'}}>
-              22
+             {global?.result?.postsCount}
             </Text>
           </View>
           <View style={{alignItems: 'center'}}>
             <Text>Friends</Text>
             <Text
               style={{color: colors.black, fontSize: 20, fontWeight: 'bold'}}>
-              22
+             {global?.result?.countFriends}
             </Text>
           </View>
         </Row>

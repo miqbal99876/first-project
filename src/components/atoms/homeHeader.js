@@ -23,7 +23,7 @@ const HomeHeader = ({navigation}) => {
             marginTop: mvs(16),
           }}>
           <Row style={{alignItems: 'center'}}>
-            <TouchableOpacity onPress={toggleDrawer1}>
+            <TouchableOpacity onPress={()=>toggleDrawer1()}>
               <Octicons name="three-bars" size={25} color={colors.black} />
             </TouchableOpacity>
             <Text style={{marginLeft: 20}}>SOCIO</Text>
@@ -44,11 +44,13 @@ const HomeHeader = ({navigation}) => {
               color={colors.black}
               style={{marginRight: 20}}
             />
+                 <TouchableOpacity onPress={()=>navigation.navigate('Profile')}>
             <Image
               source={require('../../assets/coffees/imag2.jpg')}
               style={{height: 30, width: 30, borderRadius: 15}}
               resizeMode="contain"
             />
+            </TouchableOpacity>
           </Row>
         </Row>
       </View>

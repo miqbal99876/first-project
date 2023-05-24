@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet,Image } from 'react-native';
+import IP from '../../screens/IP';
 
 const TABS = [
   { id: 'all_posts', label: 'All Posts',images:['https://images.unsplash.com/photo-1644984875406-1d3d8bc80530?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8N3x8cmV2ZXJzfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60'] },
@@ -8,6 +9,8 @@ const TABS = [
 ];
 
 const AllPost = () => {
+console.log('posts on profile screen',global.post.post);
+
   const [selectedTab, setSelectedTab] = useState(TABS[0].id);
 
   const handleTabPress = (tabId) => {
@@ -28,9 +31,18 @@ const AllPost = () => {
         ))}
       </View>
       <View style={styles.imageContainer}>
-        {TABS.find(tab => tab.id === selectedTab).images.map((image, index) => (
-          <Image key={index} source={{ uri: image }} style={styles.image} />
-        ))}
+        {global?.post?.map((item, index) => {
+          return(
+      <View key={index}>
+        {item?.post?.type==='image'?
+            <Image key={index} source={{ uri: IP.path + 'postImages/' + item.post?.text }} style={styles.image} />
+:null}
+      </View>
+
+          )
+
+        }
+        )}
       </View>
     </View>
   );

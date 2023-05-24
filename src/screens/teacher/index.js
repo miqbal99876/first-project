@@ -10,41 +10,41 @@ import { TextIcon } from '../../components/texticon';
 
 // create a component
 const Teacher = () => {
-    return (
-      <View style={styles.container}>
-        <View style={{paddingHorizontal: mvs(16), marginTop: 16}}>
-          <Row>
-            <Image
-              source={require('../../assets/images/eid.png')}
-              style={{height: 80, width: 80, borderRadius: 10}}
-              resizeMode="cover"
-            />
-            <View style={{marginLeft: 16}}>
-              <Text style={{color: colors.black, fontWeight: 'bold'}}>
-                Teacher
-              </Text>
-              <Text>teacher@gmail.com</Text>
-            </View>
-          </Row>
-          {/* body */}
-          <View style={{marginTop:mvs(70)}}>
+  return (
+    <View style={styles.container}>
+      <View style={{ paddingHorizontal: mvs(16), marginTop: 16 }}>
+        <Row>
+          <Image
+            source={require('../../assets/images/eid.png')}
+            style={{ height: 80, width: 80, borderRadius: 10 }}
+            resizeMode="cover"
+          />
+          <View style={{ marginLeft: 16 }}>
+            <Text style={{ color: colors.black, fontWeight: 'bold' }}>
+              Teacher
+            </Text>
+            <Text>teacher@gmail.com</Text>
+          </View>
+        </Row>
+        {/* body */}
+        <View style={{ marginTop: mvs(70) }}>
 
-        
-         <TextIcon title={'Teacher'} icon={'user'}/>
-         <TextIcon title={'Friends'} icon={'adduser'}/>
-         <TextIcon title={'Groups'} icon={'addusergroup'}/>
-         </View>
+
+          <TextIcon title={'Teacher'} icon={'user'} />
+          <TextIcon title={'Friends'} icon={'adduser'} />
+          <TextIcon title={'Groups'} icon={'addusergroup'} />
         </View>
-      </View>   
-    );
+      </View>
+    </View>
+  );
 };
 
 // define your styles
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-       color:colors.DEFAULT_WHITE
-    },
+  container: {
+    flex: 1,
+    color: colors.DEFAULT_WHITE
+  },
 });
 
 //make this component available to the app

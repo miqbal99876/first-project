@@ -1,4 +1,6 @@
+
+const ip = `192.168.146.17`
 export default {
-    IP: "http://192.168.146.17/BiitSocioApis/api/",
-    path: 'http://192.168.146.17/BiitSocioApis/'
+    IP: `http://${ip}/BiitSocioApis/api/`,
+    path: `http://${ip}/BiitSocioApis/`
 };

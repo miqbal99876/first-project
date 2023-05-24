@@ -1,5 +1,6 @@
 //import liraries
 import React, { useCallback, useEffect, useState } from 'react';
+
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, ScrollView, FlatList, Alert, } from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -17,20 +18,21 @@ import { useFocusEffect } from '@react-navigation/native';
 
 
 
+
 // create a component
-const Home = ({ navigation, route }) => {
+const Personal = ({ navigation,route }) => {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(1);
   const [hide, setHide] = useState(null)
   const [value, setValue] = useState(3);
   const [refresh, setRefresh] = useState(false);
   const [data, setData] = useState([]);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState('');console.log('commwnr',comment);
   const [comments, setComments] = useState([]);
-  const [showAlert, setShowAlert] = useState(false);
-  const [react, setReact] = useState('');
-  const [likes, setLikes] = useState([])
-  const [filter, setFilter] = useState([])
+  const [showAlert, setShowAlert] = useState(false); 
+  const [react, setReact] = useState(''); 
+  const[likes,setLikes]=useState([])
+  const[filter,setFilter]=useState([])
 
   const currentDate = new Date();
 
@@ -45,45 +47,46 @@ const Home = ({ navigation, route }) => {
   const currentTime = `${hours}:${minutes}:${seconds}`;
   const year1 = `${day}/${month}/${year}`
 
-  console.log('current user ', global.user);
-  console.log(year1);
-  const screenMapping = {
+  // console.log('current user ',global.user);
+  // console.log(year1);
+ const screenMapping = {
     'BIIT': 'BiitScreen',
     'Personal': 'Personal',
     'Societies': 'SocietiesScreen',
     'Calendar': 'CalendarScreen',
     'Class': 'ClassScreen',
-
+   
   };
-useFocusEffect(
-useCallback(() => {
+  useFocusEffect(
+    useCallback(() => {
     // console.log(IP);
     getPost();
     getReact();
-
+    getComment()
+  
     // removeReact();
   }, [refresh])
-)
-
+  )
   const getPost = async () => {
-    id=global.user.userType
-  var requestOptions = {
+ 
+
+    var requestOptions = {
       method: 'GET',
       redirect: 'follow'
     };
-    console.log(global?.user?.CNIC);
-    await fetch(IP.IP + "post/getPosts?cnic=" +global.user?.CNIC + "&pageNumber=1&fromWall=" + id, requestOptions)
+    // console.log(global?.user?.CNIC);
+    await fetch(IP.IP + "post/getPosts?cnic=" + global?.user?.CNIC + "&pageNumber=1&fromWall=" +global?.user?.userType, requestOptions)
       .then(response => response.json())
       .then(result => {
         console.log('posts result ', result);
-        if (result == 'No more posts') {
+        if(result=='No more posts'){
           return Alert.alert('No more posts')
         }
         else if (result == "Something went wrong try Again!") {
           setData([])
         } else {
           setData(result);
-          global.post = result
+          global.post=result
         }
       })
 
@@ -108,7 +111,7 @@ useCallback(() => {
 
     fetch(IP.IP + "Reacts/addReaction", requestOptions)
       .then(response => response.json())
-      .then(result => { console.log('result>>>>>>>>', result); getReact(id); setRefresh(true) })
+      .then(result =>{ console.log('result>>>>>>>>', result);getReact(id);setRefresh(!refresh)})
       .catch(error => console.log('error', error));
   }
 
@@ -120,7 +123,7 @@ useCallback(() => {
 
     fetch(IP.IP + "Post/deletePost?post_id=" + id, requestOptions)
       .then(response => response.json())
-      .then(result => { setRefresh(!refresh) })
+      .then(result => {setRefresh(!refresh);deletePost()})
       .catch(error => console.log('error', error));
   }
   const addComment = (id) => {
@@ -131,7 +134,7 @@ useCallback(() => {
       "userId": global.user.cnic,
       "postId": id,
       "dateTime": year1,
-      "repliedOn": 82,
+      "repliedOn":id,
       "text": comment
     });
 
@@ -147,7 +150,7 @@ useCallback(() => {
     fetch(IP.IP + "comments/addComment", requestOptions)
       .then(response => response.json())
       .then(result => {
-        console.log(result);
+        console.log( 'adddcommment ',result);
         // Reload the page to show the latest comments
         setRefresh(!refresh)
         setComment('')
@@ -162,10 +165,10 @@ useCallback(() => {
       redirect: 'follow'
     };
 
-    fetch(IP.IP + "comments/getComment?post_id=" + id, requestOptions)
+    fetch(IP.IP + "comments/getComment?post_id="+id, requestOptions)
       .then(response => response.json())
       .then(result => {
-        console.log('result>>>>>>>>>', result);
+        console.log('getcomentt>>>>>>>>>>>>>>>>>>>', result);
         if (result == "Something went wrong try Again!") {
           setComments([])
         } else {
@@ -184,7 +187,7 @@ useCallback(() => {
       title: 'Share', // The title of the sharing dialog
     };
     try {
-      console.log(shareOptions);
+      // console.log(shareOptions);
       const result = await Share.open(shareOptions);
       if (result.action === Share.sharedAction) {
         Alert.alert('Post shared successfully');
@@ -205,17 +208,20 @@ useCallback(() => {
     );
   }
 
-  const getReact = async (react) => {
-    var requestOptions = {
-      method: 'GET',
-      redirect: 'follow'
-    };
+const getReact=async(react)=>{
+  var requestOptions = {
+    method: 'GET',
+    redirect: 'follow'
+  };
+  
+  fetch(IP.IP+"Reacts/getReactions?post_id="+react, requestOptions)
+    .then(response =>response.json())
+    .then(result => {console.log('get reaction>>>>>>>>',result);})
+    .catch(error => console.log('error', error));
+}
 
-    fetch(IP.IP + "Reacts/getReactions?post_id=" + react, requestOptions)
-      .then(response => response.json())
-      .then(result => { console.log('get reaction>>>>>>>>', result); setRefresh(true) })
-      .catch(error => console.log('error', error));
-  }
+
+
   return (
     <View style={styles.container}>
       <HomeHeader navigation={navigation} />
@@ -232,7 +238,7 @@ useCallback(() => {
           value={search}
           onChangeText={str => setSearch(str)}
         />
-        <TouchableOpacity onPress={() => navigation.navigate('NewPost', { data: 'Home' })}>
+        <TouchableOpacity onPress={() => navigation.navigate('NewPost',{data:'Personal'})}>
           <Ionicons name="camera-outline" size={50} color={colors.border} />
         </TouchableOpacity>
         <TouchableOpacity
@@ -249,18 +255,18 @@ useCallback(() => {
           // console.log('itemm',item.post.likesCount);
 
           // console.log(item.post.name)
+          // postId = item.post.id;
+          // console.log('postId>>>>>>>>>',postId);
 
-          console.log('postId>>>>>>>>>', item.post.id);
-
-
+          
           //   ?item?.post?.user 
           //  :JSON.parse(item?.post?.user)
-          const user = JSON.parse(item?.post?.user)
-          console.log('userrrrrr', user?.name)
-          const dateTimeString = item?.post?.dateTime
-          const dateOnly = dateTimeString.split(" ")[0];
-
-          console.log(dateOnly);
+          const user =JSON.parse(item?.post?.user)
+          //  console.log('userrrrrr',user?.name)
+           const dateTimeString =item?.post?.dateTime
+           const dateOnly = dateTimeString.split(" ")[0];
+           
+           console.log(dateOnly);
 
 
           return (
@@ -280,7 +286,7 @@ useCallback(() => {
                   justifyContent: 'space-between',
                 }}>
                 <Row style={{ alignItems: 'center' }}>
-
+             
                   <Image
                     // source={{uri:IP.path+'Images/'+user?.profileImage}}
                     source={require('../../assets/images/eid.png')}
@@ -308,8 +314,8 @@ useCallback(() => {
                           onPress: () => setShowAlert(false),
                           style: 'cancel'
                         },
-                        { text: 'OK', onPress: () => { deletePost(item.post.id); setShowAlert(false) } },
-
+                        { text: 'OK', onPress: () => {deletePost(item.post.id);setShowAlert(false)} },
+                     
                       ],
                       { cancelable: false }
                     )
@@ -319,7 +325,7 @@ useCallback(() => {
               <Text style={{ color: colors.black, marginTop: mvs(20), marginBottom: 5 }}>
                 {item?.post?.description}
               </Text>
-              {console.log(IP.path + 'postImages/' + item.post?.text, item?.post?.type)}
+              {/* {console.log(IP.path + 'postImages/' + item.post?.text, item?.post?.type)} */}
               {
                 item?.post?.type == "image" ?
                   <Image
@@ -356,7 +362,7 @@ useCallback(() => {
                   marginBottom: mvs(20),
                 }}>
                 <Row style={{ justifyContent: 'space-evenly' }}>
-                  <TouchableOpacity onPress={() => { setHide(item.post.id); getComment(item?.post?.id) }}>
+                  <TouchableOpacity onPress={() => { setHide(item.post.id); getComment(item?.post?.id),console.log('id',item?.post?.id); }}>
                     <Ionicons
                       name="chatbubble-ellipses-outline"
                       size={25}
@@ -365,13 +371,13 @@ useCallback(() => {
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => addReact(item.post.id)}>
 
-                    <Ionicons
-                      style={{ marginLeft: 10 }}
-                      name={item.isLiked ? "heart" : "heart-outline"}
-                      size={25}
-                      color={item.isLiked ? "red" : "black"}
-                    />
-                  </TouchableOpacity>
+   <Ionicons
+   style={{ marginLeft: 10 }}
+   name={item.isLiked?"heart":"heart-outline"}
+   size={25}
+   color={item.isLiked?"red":"black"}
+ />
+   </TouchableOpacity>
                   <TouchableOpacity onPress={() => onShare(item)}>
                     <Icon
                       style={{ marginLeft: 10 }}
@@ -395,7 +401,7 @@ useCallback(() => {
                       multiline={true}
                       placeholderTextColor={'black'}
                       style={{ borderWidth: 1, width: '80%' }} />
-                    <TouchableOpacity onPress={() => { addComment(item.post.id); setHide(null); setComment(''); setReact(item.post.id) }} style={{ padding: 10, backgroundColor: 'blue', borderRadius: 10 }}>
+                    <TouchableOpacity onPress={() => { addComment(item.post.id); setHide(null); setComment('');setReact(item.post.id) }} style={{ padding: 10, backgroundColor: 'blue', borderRadius: 10 }}>
                       <Text style={{ color: 'white' }}>Send</Text>
                     </TouchableOpacity>
                   </Row>
@@ -453,7 +459,7 @@ useCallback(() => {
               // navigation.navigate(screenName,{index}); // Navigate to the corresponding screen
               if (item == "BIIT") {
                 navigation.navigate(screenName, { index });
-
+               
               } else if (item == 'Student') {
                 getPost(1)
 
@@ -534,4 +540,4 @@ const styles = StyleSheet.create({
 });
 
 //make this component available to the app
-export default Home;
+export default Personal;

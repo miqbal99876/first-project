@@ -1,13 +1,31 @@
 //import liraries
-import React, { Component } from 'react';
-import { View, Text, StyleSheet, Image,ScrollView } from 'react-native';
+import React, { useEffect,useState} from 'react';
+import { View, Text, StyleSheet, Image,ScrollView, TouchableOpacity } from 'react-native';
 import { colors } from '../../config/colors';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Row } from '../../components/atoms/row';
 import { mvs } from '../../config/metrices';
+import IP from '../IP';
 
 // create a component
-const Notification = () => {
+const Notification = ({navigation}) => {
+
+const [notifications,setNotifications]=useState([]);
+
+  const getNotifications=(id=2)=>{
+    var requestOptions = {
+      method: 'GET',
+      redirect: 'follow'
+    };
+    
+    fetch(IP.IP+"Notification/getNotification?userId="+id, requestOptions)
+      .then(response => response.json())
+      .then(result => setNotifications(result))
+      .catch(error => console.log('error', error));
+  }
+  useEffect(()=>{
+    getNotifications();
+  },[])
     return (
       <View style={styles.container}>
         <Row
@@ -17,13 +35,16 @@ const Notification = () => {
             paddingHorizontal: mvs(16),
             marginTop: mvs(16),
           }}>
+<TouchableOpacity onPress={()=>navigation.goBack()}>
           <Icon name="arrow-back" size={30} color={colors.black} />
+          </TouchableOpacity>
+
           <Text style={{fontWeight: 'bold', color: colors.black, fontSize: 20}}>
             Notification
           </Text>
         </Row>
         <ScrollView showsVerticalScrollIndicator={false} style={{paddingHorizontal: mvs(16), marginTop: mvs(16)}}>
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item, index) => (
+          {notifications.map((item, index) => (
             <Row key={index} style={{justifyContent: 'space-between',marginBottom:30}}>
               <Row>
                 <Image
@@ -32,16 +53,21 @@ const Notification = () => {
                 />
                 <View style={{marginLeft: 16}}>
                   <Text style={{fontWeight: 'bold', color: colors.black}}>
-                    Shahid
-                    <Text style={{color: colors.border}}> Like Your Post</Text>
+                  {item?.user?.name}
+                    <Text style={{color: colors.border}}>{item?.n?.type}</Text>
                   </Text>
-                  <Text>03/06/2023</Text>
+                  <Text>{item?.n?.dateTime}</Text>
                 </View>
               </Row>
-              <Image
+              {item?.postImage!=null?
+               <Image
+               source={{uri: IP.path + 'postImages/' + item?.postImage }}
+               style={{height: 50, width: 50, borderRadius: 5}}
+             />
+             : <Image
                 source={require('../../assets/images/mountain.jpg')}
                 style={{height: 50, width: 50, borderRadius: 5}}
-              />
+              />}
             </Row>
           ))}
         </ScrollView>

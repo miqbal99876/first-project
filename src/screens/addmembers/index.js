@@ -1,6 +1,6 @@
 //import liraries
 import React, { useEffect, useState} from 'react';
-import { View, Text, StyleSheet,TextInput, Image, ScrollView,KeyboardAvoidingView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet,TextInput, Image, ScrollView,KeyboardAvoidingView, TouchableOpacity, Alert } from 'react-native';
 import { colors } from '../../config/colors';
 import { Row } from '../../components/atoms/row';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -23,7 +23,9 @@ const AddMembers = ({navigation,route}) => {
       fetch(IP.IP+"Friends/getFriends?user_id="+global?.user?.CNIC, requestOptions)
         .then(response => response.json())
         .then(result => {
-          if(result.length>0)
+          if(result.length==0){
+            Alert.alert('Please add Friends to Create group')
+          }
           {
             // console.log(result[0]);
             setData(result)

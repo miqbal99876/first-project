@@ -94,14 +94,15 @@ const ChatScreen = ({ route, navigation }) => {
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Icon name={'arrow-back'} size={25} color={colors.black} />
                 </TouchableOpacity>
-
-                <Row style={{}}>
+                <TouchableOpacity onPress={()=>navigation.navigate('GroupDetail',{item:item})}>
+ <Row style={{}}>
                     <Image source={require('../../assets/images/cover.png')} style={{ height: 60, width: 60, borderRadius: 30 }} />
                     <View style={{ marginLeft: 16 }}>
                         <Text style={{ color: colors.black, fontWeight: 'bold' }}>{item.name}</Text>
                         <Text>CS7A</Text>
                     </View>
                 </Row>
+                </TouchableOpacity>
 
                 <Entypo
                     name="dots-three-vertical"

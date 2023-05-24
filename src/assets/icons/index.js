@@ -1,7 +1,7 @@
 export {default as Complete} from './complete.svg';
 export {default as SplashIcon} from './splash.svg';
 export {default as SplashBG} from './splach_bg.svg';
-export {default as Back} from './back.svg';
+export {default as Back} from './0.110.svg';
 export {default as RegisterIcon} from './register.svg';
 export {default as LoginIcon} from './login.svg';
 export {default as SearchIcon} from './search.svg';

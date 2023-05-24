@@ -9,7 +9,6 @@ export const StoryCard=({style})=>{
 
 
 
-
     return(
         <View style={style}>
         <View style={{backgroundColor:colors.white,elevation:5,marginHorizontal:5,paddingBottom:5}}>

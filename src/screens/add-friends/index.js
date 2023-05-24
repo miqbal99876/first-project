@@ -11,20 +11,20 @@ import CreateGroup from '../createGroup';
 import { useIsFocused } from '@react-navigation/native';
 
 // create a component
-const GroupsScreen = ({navigation}) => {
+const AddFriends = ({navigation}) => {
     const[search, setSearch]=useState('')
     const[data, setData]=useState([])
     
 let isfoc=useIsFocused()
 
     
-      const getGroups=async()=>{
+      const getFriends=async()=>{
         var requestOptions = {
           method: 'GET',
           redirect: 'follow'
         };
         // console.log('global.user.userType',global.user)
-       await fetch(IP.IP+"groups/getGroups?cnic="+global?.user.CNIC+"&userType="+global.user.userType, requestOptions)
+       await fetch(IP.IP+"Friends/getFriends?user_id="+global?.user?.CNIC, requestOptions)
           .then(response => response.json())
           .then(result =>
             { 
@@ -41,7 +41,7 @@ let isfoc=useIsFocused()
 
 
     useEffect(()=>{
-getGroups();
+getFriends();
     },[isfoc])
     return (
       <View style={styles.container}>
@@ -49,24 +49,15 @@ getGroups();
         <Row
           style={{
             justifyContent: 'space-between',
-            paddingHorizontal: mvs(16),
+          marginHorizontal: mvs(16),
             marginTop: 16,
            
           }}>
             
-          <Icon name={'arrow-back'} size={25} color={colors.black} />
-          <Text style={{fontSize: 20, fontWeight: 'bold', color: colors.black}}>
-           Groups
-          </Text>
-          <Text style={{color: colors.black}}></Text>
-          <TouchableOpacity onPress={()=>navigation.navigate('CreateGroup')}>
-          <Icons name={'plus'} size={25} color={colors.black} />
-          </TouchableOpacity>
-        </Row>
-        {/* search */}
-        <View style={styles. textinputview}>
-        
+          <Icon name={'arrow-back'} size={25} color={colors.black} onPress={()=>navigation.goBack()}/>
+          <View style={styles. textinputview}>
       <Icons name="search" size={20} color="#333" style={styles.icon} />
+        
       <TextInput
         placeholder="Search here"
         style={styles.input}
@@ -76,17 +67,30 @@ getGroups();
       />
     
     </View>
+        </Row>
+        {/* search */}
+    
     <ScrollView>
     {/* card */}
 {data.map((item,index)=>{
   console.log(item);
   return(
     <TouchableOpacity key={index} onPress={()=>navigation.navigate('ChatScreen',item)}>
-    <Row  style={{backgroundColor:colors.DEFAULT_WHITE,marginHorizontal:16,marginTop:20,elevation:10,padding:5}}>
-    <Image source={require('../../assets/images/cover.png')}style={{height:60,width:60,borderRadius:30}}/>
+    <Row  style={{backgroundColor:colors.DEFAULT_WHITE,marginHorizontal:16,marginTop:20,elevation:10,padding:5,marginBottom:10}}>
+    {
+                item?.profileImage !== null ?
+                  <Image
+                    source={{ uri: IP.path + 'Images/' + item?.profileImage }}
+                    style={{height:60,width:60,borderRadius:30}}
+
+                  />
+   : <Image source={require('../../assets/images/cover.png')}style={{height:60,width:60,borderRadius:30}}/>
+    
+    }
+
     <View style={{marginLeft:16}}>
         <Text style={{color:colors.black,fontWeight:'bold'}}>{item?.name}</Text>
-        <Text>CS7A</Text>
+        <Text>{item?.email}</Text>
     </View>
    </Row>
    </TouchableOpacity>
@@ -111,8 +115,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 10,
         paddingHorizontal: 10,
-        marginHorizontal: 16,
-        marginTop: 20,
+        marginHorizontal: 30,
+      
         elevation:5
       },
       input: {
@@ -127,4 +131,4 @@ const styles = StyleSheet.create({
 });
 
 //make this component available to the app
-export default GroupsScreen;
+export default AddFriends;

@@ -1,6 +1,6 @@
 //import liraries
 import React, { useState,useEffect} from 'react';
-import { View, Text, StyleSheet,TextInput, Image, ScrollView,KeyboardAvoidingView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet,TextInput, Image, ScrollView,KeyboardAvoidingView, TouchableOpacity, Alert } from 'react-native';
 import { colors } from '../../config/colors';
 import { Row } from '../../components/atoms/row';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -11,7 +11,7 @@ import CreateGroup from '../createGroup';
 import { useIsFocused } from '@react-navigation/native';
 
 // create a component
-const GroupsScreen = ({navigation}) => {
+const Friends = ({navigation}) => {
     const[search, setSearch]=useState('')
     const[data, setData]=useState([])
     
@@ -24,7 +24,7 @@ let isfoc=useIsFocused()
           redirect: 'follow'
         };
         // console.log('global.user.userType',global.user)
-       await fetch(IP.IP+"groups/getGroups?cnic="+global?.user.CNIC+"&userType="+global.user.userType, requestOptions)
+       await fetch(IP.IP+"Friends/getFriends?user_id="+global?.user?.CNIC, requestOptions)
           .then(response => response.json())
           .then(result =>
             { 
@@ -32,7 +32,10 @@ let isfoc=useIsFocused()
               {
               setData(result)
               }
-              console.log(1,result);
+              else{
+                Alert.alert('No Friends');
+
+              }
           })
          
           .catch(error => console.log('error>>>>ssss>>>>>>>', error));
@@ -54,12 +57,12 @@ getGroups();
            
           }}>
             
-          <Icon name={'arrow-back'} size={25} color={colors.black} />
+          <Icon name={'arrow-back'} size={25} color={colors.black} onPress={()=>navigation.goBack()}/>
           <Text style={{fontSize: 20, fontWeight: 'bold', color: colors.black}}>
-           Groups
+          Friends
           </Text>
           <Text style={{color: colors.black}}></Text>
-          <TouchableOpacity onPress={()=>navigation.navigate('CreateGroup')}>
+          <TouchableOpacity onPress={()=>navigation.navigate('AddFriends')}>
           <Icons name={'plus'} size={25} color={colors.black} />
           </TouchableOpacity>
         </Row>
@@ -82,11 +85,21 @@ getGroups();
   console.log(item);
   return(
     <TouchableOpacity key={index} onPress={()=>navigation.navigate('ChatScreen',item)}>
-    <Row  style={{backgroundColor:colors.DEFAULT_WHITE,marginHorizontal:16,marginTop:20,elevation:10,padding:5}}>
-    <Image source={require('../../assets/images/cover.png')}style={{height:60,width:60,borderRadius:30}}/>
+    <Row  style={{backgroundColor:colors.DEFAULT_WHITE,marginHorizontal:16,marginTop:20,elevation:10,padding:5,marginBottom:10}}>
+    {
+                item?.profileImage !== null ?
+                  <Image
+                    source={{ uri: IP.path + 'Images/' + item?.profileImage }}
+                    style={{height:60,width:60,borderRadius:30}}
+
+                  />
+   : <Image source={require('../../assets/images/cover.png')}style={{height:60,width:60,borderRadius:30}}/>
+    
+    }
+
     <View style={{marginLeft:16}}>
         <Text style={{color:colors.black,fontWeight:'bold'}}>{item?.name}</Text>
-        <Text>CS7A</Text>
+        <Text>{item?.email}</Text>
     </View>
    </Row>
    </TouchableOpacity>
@@ -127,4 +140,4 @@ const styles = StyleSheet.create({
 });
 
 //make this component available to the app
-export default GroupsScreen;
+export default Friends;
