@@ -1,6 +1,6 @@
 //import liraries
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View ,FlatList} from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import ImagePicker from 'react-native-image-crop-picker';
 import { default as Icon, default as Ionicons } from 'react-native-vector-icons/Ionicons';
@@ -10,6 +10,7 @@ import PrimaryModal from '../../components/modals/primary-modal';
 import { colors } from '../../config/colors';
 import IP from '../IP';
 import BottomTabBar from '../../navigator/bottom-tab/bottomTabBar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // create a component
 const NewPost = ({ navigation, route }) => {
@@ -24,15 +25,15 @@ const NewPost = ({ navigation, route }) => {
   const [model, setModal] = useState(false)
   const [image, setImage] = useState(null);
   //  const[desciplines,setDescipline]=useState([]);console.log(desciplines.sections)
-  const [upload, setUpload] = useState(null); console.log(global.user);
+  const [upload, setUpload] = useState(null);
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
-  const [section, setSection] = useState([]);console.log('>>>>>>>>>>>',section);
+  const [section, setSection] = useState([]); console.log('>>>>>>>>>>>', section);
   const [selected, setSelected] = useState('');
-  const[hide,setHide]=useState(false)
+  const [hide, setHide] = useState(false)
 
   const [desciplines, setDesciplines] = useState([]);
   const [sections, setSections] = useState([]);
-  const [selectedItems, setSelectedItems] = useState([]);console.log('>>>>>>>>>>>',selectedItems)
+  const [selectedItems, setSelectedItems] = useState([]); console.log('>>>>>>>>>>>', selectedItems)
   const currentDate = new Date();
 
   const day = currentDate.getDate();
@@ -42,14 +43,21 @@ const NewPost = ({ navigation, route }) => {
   const arr = selectedItems;
   const str = arr.join(", ");
 
-  
+  const [loginData, setLoginData] = useState([])
+  useEffect(() => {
+    getData();
+  }, [])
 
-
-
-
-
-  const user = JSON.stringify(global.user);
-
+  const getData = async () => {
+    try {
+      const data = await AsyncStorage.getItem('@user')
+      const jsonValue = data != null ? JSON.parse(data) : null;
+      setLoginData(jsonValue)
+      getdesciplines(jsonValue);
+    } catch (e) {
+      // error reading value
+    }
+  }
 
   const fromGallery = () => {
     ImagePicker.openPicker({
@@ -89,31 +97,31 @@ const NewPost = ({ navigation, route }) => {
 
 
     if (selectedScreen == 'Home') {
-      id = global.user.userType
- if (global.user.userType===id){
-  id = global.user.userType
-}
-   
+      id = loginData?.userType
+      if (loginData?.userType === id) {
+        id = loginData?.userType
+      }
+
     } else if (selectedScreen == 'Personal') {
-      id = global?.user?.userType
+      id = loginData?.userType
     } else if (selectedScreen == 'class') {
       id = 5
     }
-if(global.user.userType===3){
-  setSelected('All')
-}else{
-  setSelected(str)
-}
-   
+    if (loginData?.userType === 3) {
+      setSelected('All')
+    } else {
+      setSelected(str)
+    }
+
 
     var formdata = new FormData();
-    formdata.append("postedBy", global.user.CNIC );
-    formdata.append("postFor", id);
+    formdata.append("postedBy", loginData?.CNIC);
+    formdata.append("postFor", selected);
     formdata.append("description", desc);
     formdata.append("dateTime", day + "-" + month + "-" + year);
     formdata.append("type", "image");
     formdata.append("fromWall", id);
-    formdata.append("user", user);
+    formdata.append("user", JSON.stringify(loginData));
     formdata.append("image", upload);
     console.log(upload);
     // console.log('i>>>>>>>>>>>>',!upload?.type?'text': upload?.type.split('/')[0]==='image'?'image':'video','-----------');
@@ -146,21 +154,20 @@ if(global.user.userType===3){
       .catch(error => console.log('error', error));
   }
 
-  const getdesciplines = () => {
+  const getdesciplines = (user) => {
     var requestOptions = {
       method: 'GET',
       redirect: 'follow'
     };
 
-    fetch(IP.IP + "user/getDescipline?cnic=" + global?.user?.CNIC + "&fromWall=" + global?.user?.userType, requestOptions)
+    fetch(IP.IP + "user/getDescipline?cnic=" + user.CNIC + "&fromWall=" + user.userType, requestOptions)
       .then(response => response.json())
       .then(data => { setDesciplines(data); console.log(data); })
       .catch(error => console.log('error', error));
   }
 
-  useEffect(() => {
-    getdesciplines();
-  }, [])
+  // useEffect(() => {
+  // }, [])
 
 
   const toggleItemSelection = (item) => {
@@ -217,48 +224,48 @@ if(global.user.userType===3){
             )}
 
         </View>
-        {global.user.userType===3?
-        <TouchableOpacity  style={{width:40,height:40,backgroundColor:'green',justifyContent:'center',alignItems:'center',borderRadius:10,marginTop:20,alignSelf:'center'}}>
-          <Text style={{color:'white'}}>All</Text>
-        </TouchableOpacity>
-        :null}
+        {loginData?.userType === 3 ?
+          <TouchableOpacity style={{ width: 40, height: 40, backgroundColor: 'green', justifyContent: 'center', alignItems: 'center', borderRadius: 10, marginTop: 20, alignSelf: 'center' }}>
+            <Text style={{ color: 'white' }}>All</Text>
+          </TouchableOpacity>
+          : null}
 
-        <TouchableOpacity style={{padding:20}} onPress={()=>setHide(!hide)}>
+        <TouchableOpacity style={{ padding: 20 }} onPress={() => setHide(!hide)}>
           <Text>You want to select more?</Text>
         </TouchableOpacity>
-        {hide?
-        <View>
-        {desciplines.map((item, index) => (
-        <View key={index}>
-          <Text style={{color:'green',fontSize:20,fontWeight:'bold'}}>{item.category}</Text>
-          {item.isString ? (
-            <View>
-             <FlatList data={item.data}
-             keyExtractor={(item,index)=>index.toString()}
-             numColumns={3}
-             renderItem={({item})=>{
-              return(
-                <TouchableOpacity onPress={()=>toggleItemSelection(item)}  onLongPress={() => toggleItemSelection(item)}  style={{justifyContent:'center',alignItems:'center',flex:1,paddingVertical:10,}}>
-                  <Text style={{backgroundColor:selectedItems.includes(item) ? 'green' : 'grey',padding:5,borderRadius:5,color:'white'}}>{item}</Text>
-                </TouchableOpacity>
-              )
-             }}/>
-            </View>
-          ) : (
-            <View>
-              {item.users.map((user, innerIndex) => (
-                <TouchableOpacity onPress={()=>toggleItemSelection(user)} onLongPress={() => toggleItemSelection(user?.name)}  key={innerIndex} style={{paddingVertical:15,alignItems:'center',}}>
-                  <Text  style={{backgroundColor:selectedItems.includes(user) ? 'green' : 'grey',padding:5,borderRadius:5,color:'white'}}>{user.name}</Text>
-                
-                  {/* Render other user information as needed */}
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-        </View>
-      ))}</View>
-      :null}
- <TouchableOpacity onPress={() => setModal(true)} style={{ flexDirection: 'row', alignItems: 'center' }}>
+        {hide ?
+          <View>
+            {desciplines.map((item, index) => (
+              <View key={index}>
+                <Text style={{ color: 'green', fontSize: 20, fontWeight: 'bold' }}>{item.category}</Text>
+                {item.isString ? (
+                  <View>
+                    <FlatList data={item.data}
+                      keyExtractor={(item, index) => index.toString()}
+                      numColumns={3}
+                      renderItem={({ item }) => {
+                        return (
+                          <TouchableOpacity onPress={() => toggleItemSelection(item)} onLongPress={() => toggleItemSelection(item)} style={{ justifyContent: 'center', alignItems: 'center', flex: 1, paddingVertical: 10, }}>
+                            <Text style={{ backgroundColor: selectedItems.includes(item) ? 'green' : 'grey', padding: 5, borderRadius: 5, color: 'white' }}>{item}</Text>
+                          </TouchableOpacity>
+                        )
+                      }} />
+                  </View>
+                ) : (
+                  <View>
+                    {item.users.map((user, innerIndex) => (
+                      <TouchableOpacity onPress={() => toggleItemSelection(user)} onLongPress={() => toggleItemSelection(user?.name)} key={innerIndex} style={{ paddingVertical: 15, alignItems: 'center', }}>
+                        <Text style={{ backgroundColor: selectedItems.includes(user) ? 'green' : 'grey', padding: 5, borderRadius: 5, color: 'white' }}>{user.name}</Text>
+
+                        {/* Render other user information as needed */}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </View>
+            ))}</View>
+          : null}
+        <TouchableOpacity onPress={() => setModal(true)} style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Ionicons name='camera-outline' size={35} color={colors.black} />
           <Text style={{ marginLeft: 10, color: colors.black, fontWeight: 'bold' }}>Click Here To Choose</Text>
         </TouchableOpacity>

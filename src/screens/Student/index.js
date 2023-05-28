@@ -1,8 +1,6 @@
-//import liraries
-import React, { useCallback, useEffect, useState } from 'react';
 
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, ScrollView, FlatList, Alert, } from 'react-native';
-import Octicons from 'react-native-vector-icons/Octicons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -16,9 +14,8 @@ import Share from 'react-native-share';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 // create a component
-const Personal = ({ navigation, route }) => {
+const Student = ({ navigation, route }) => {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(1);
   const [hide, setHide] = useState(null)
@@ -54,9 +51,12 @@ const Personal = ({ navigation, route }) => {
 
   };
 
+
   const [loginData, setLoginData] = useState([])
+
   useFocusEffect(
     useCallback(() => {
+      // console.log(IP);
       getData();
       getReact();
       getComment()
@@ -69,19 +69,18 @@ const Personal = ({ navigation, route }) => {
       const data = await AsyncStorage.getItem('@user')
       const jsonValue = data != null ? JSON.parse(data) : null;
       setLoginData(jsonValue)
-      getPost(jsonValue?.CNIC, jsonValue.userType);
+      getPost(jsonValue?.CNIC);
     } catch (e) {
       // error reading value
     }
   }
 
-  const getPost = async (cnic, userType) => {
+  const getPost = async (cnic) => {
     var requestOptions = {
       method: 'GET',
       redirect: 'follow'
     };
-
-    await fetch(IP.IP + "post/getPosts?cnic=" + cnic + "&pageNumber=1&fromWall=" + userType, requestOptions)
+    await fetch(IP.IP + "post/getPosts?cnic=" + cnic + "&pageNumber=1&fromWall=1", requestOptions)
       .then(response => response.json())
       .then(result => {
         console.log('posts result ', result);
@@ -229,7 +228,7 @@ const Personal = ({ navigation, route }) => {
     <View style={styles.container}>
       <HomeHeader navigation={navigation} />
 
-      <Row style={styles.search}>
+      {loginData?.userType == 1 && <Row style={styles.search}>
         <Image
           source={require('../../assets/coffees/imag2.jpg')}
           style={styles.searchimg}
@@ -249,14 +248,28 @@ const Personal = ({ navigation, route }) => {
           style={styles.iconContainer}>
           <Ionicons name="person-add" size={24} color="black" />
         </TouchableOpacity>
-      </Row>
-
+      </Row>}
+      {/* post */}
       <FlatList
         data={data}
         renderItem={({ item }) => {
+          // console.log('this dat',item?.post?.type==="text")
+          // console.log('itemm',item.post.likesCount);
+
+          // console.log(item.post.name)
+          // postId = item.post.id;
+          // console.log('postId>>>>>>>>>',postId);
+
+
+          //   ?item?.post?.user 
+          //  :JSON.parse(item?.post?.user)
           const user = JSON.parse(item?.post?.user)
+          //  console.log('userrrrrr',user?.name)
           const dateTimeString = item?.post?.dateTime
           const dateOnly = dateTimeString.split(" ")[0];
+
+          console.log(dateOnly);
+
 
           return (
             <View
@@ -529,4 +542,4 @@ const styles = StyleSheet.create({
 });
 
 //make this component available to the app
-export default Personal;
+export default Student;

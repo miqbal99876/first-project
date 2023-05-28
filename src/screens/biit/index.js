@@ -13,11 +13,12 @@ import PrimaryInput from '../../components/atoms/inputs';
 import IP from '../IP';
 import Video from 'react-native-video';
 import Share from 'react-native-share';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
 // create a component
-const BiitScreen = ({ navigation,route }) => {
+const BiitScreen = ({ navigation, route }) => {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(0);
   const [hide, setHide] = useState(null)
@@ -26,10 +27,10 @@ const BiitScreen = ({ navigation,route }) => {
   const [data, setData] = useState([]);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
-  const [showAlert, setShowAlert] = useState(false); 
-  const [react, setReact] = useState(''); 
-  const[likes,setLikes]=useState([])
-  const[filter,setFilter]=useState([])
+  const [showAlert, setShowAlert] = useState(false);
+  const [react, setReact] = useState('');
+  const [likes, setLikes] = useState([])
+  const [filter, setFilter] = useState([])
 
   const currentDate = new Date();
 
@@ -44,31 +45,41 @@ const BiitScreen = ({ navigation,route }) => {
   const currentTime = `${hours}:${minutes}:${seconds}`;
   const year1 = `${day}/${month}/${year}`
 
-  console.log('current user ',global.user);
   console.log(year1);
- const screenMapping = {
+  const screenMapping = {
     'BIIT': 'BiitScreen',
     'Personal': 'Personal',
     'Societies': 'SocietiesScreen',
     'Calendar': 'CalendarScreen',
     'Class': 'ClassScreen',
-   
+
   };
+  const [loginData, setLoginData] = useState([])
   useEffect(() => {
-    // console.log(IP);
-    getPost();
-    getReact()
-    // removeReact();
+    getData();
+    getReact();
   }, [refresh])
-  const getPost = async () => {
-  const id= global?.user?.name=='Shahid'?4:global?.user?.userType
+
+  const getData = async () => {
+    try {
+      const data = await AsyncStorage.getItem('@user')
+      const jsonValue = data != null ? JSON.parse(data) : null;
+      setLoginData(jsonValue)
+      getPost(jsonValue)
+    } catch (e) {
+      // error reading value
+    }
+  }
+
+  const getPost = async (user) => {
+    const id = user.name == 'Shahid' ? 4 : user.userType
 
     var requestOptions = {
       method: 'GET',
       redirect: 'follow'
     };
-    console.log(global?.user?.CNIC);
-    await fetch(IP.IP + "post/getPosts?cnic=" + global?.user?.CNIC + "&pageNumber=1&fromWall=" +global?.user?.userType, requestOptions)
+
+    await fetch(IP.IP + "post/getPosts?cnic=" + user.CNIC + "&pageNumber=1&fromWall=" + user.userType, requestOptions)
       .then(response => response.json())
       .then(result => {
         console.log('posts result', result);
@@ -76,7 +87,7 @@ const BiitScreen = ({ navigation,route }) => {
           setData([])
         } else {
           setData(result);
-          global.post=result
+          global.post = result
         }
       })
 
@@ -88,7 +99,7 @@ const BiitScreen = ({ navigation,route }) => {
 
     var raw = JSON.stringify({
       "postId": id,
-      "userid": global?.user?.CNIC,
+      "userid": loginData?.CNIC,
       "emogie": "like"
     });
 
@@ -101,7 +112,7 @@ const BiitScreen = ({ navigation,route }) => {
 
     fetch(IP.IP + "Reacts/addReaction", requestOptions)
       .then(response => response.json())
-      .then(result =>{ console.log('result>>>>>>>>', result);getReact(id);setRefresh(true)})
+      .then(result => { console.log('result>>>>>>>>', result); getReact(id); setRefresh(true) })
       .catch(error => console.log('error', error));
   }
 
@@ -113,7 +124,7 @@ const BiitScreen = ({ navigation,route }) => {
 
     fetch(IP.IP + "Post/deletePost?post_id=" + id, requestOptions)
       .then(response => response.json())
-      .then(result => {setRefresh(true);deletePost()})
+      .then(result => { setRefresh(true); deletePost() })
       .catch(error => console.log('error', error));
   }
   const addComment = (id) => {
@@ -121,7 +132,7 @@ const BiitScreen = ({ navigation,route }) => {
     myHeaders.append("Content-Type", "application/json");
 
     var raw = JSON.stringify({
-      "userId": global.user.cnic,
+      "userId": loginData.cnic,
       "postId": id,
       "dateTime": year1,
       "repliedOn": 82,
@@ -198,17 +209,17 @@ const BiitScreen = ({ navigation,route }) => {
     );
   }
 
-const getReact=async(react)=>{
-  var requestOptions = {
-    method: 'GET',
-    redirect: 'follow'
-  };
-  
-  fetch(IP.IP+"Reacts/getReactions?post_id="+react, requestOptions)
-    .then(response =>response.json())
-    .then(result => {console.log('get reaction>>>>>>>>',result); setLikes(result)})
-    .catch(error => console.log('error', error));
-}
+  const getReact = async (react) => {
+    var requestOptions = {
+      method: 'GET',
+      redirect: 'follow'
+    };
+
+    fetch(IP.IP + "Reacts/getReactions?post_id=" + react, requestOptions)
+      .then(response => response.json())
+      .then(result => { console.log('get reaction>>>>>>>>', result); setLikes(result) })
+      .catch(error => console.log('error', error));
+  }
 
 
 
@@ -248,7 +259,7 @@ const getReact=async(react)=>{
                   justifyContent: 'space-between',
                 }}>
                 <Row style={{ alignItems: 'center' }}>
-             
+
                   <Image
                     // source={{uri:IP.path+'Images/'+user?.profileImage}}
                     source={require('../../assets/images/eid.png')}
@@ -276,8 +287,8 @@ const getReact=async(react)=>{
                           onPress: () => setShowAlert(false),
                           style: 'cancel'
                         },
-                        { text: 'OK', onPress: () => {deletePost(item.post.id);setShowAlert(false)} },
-                     
+                        { text: 'OK', onPress: () => { deletePost(item.post.id); setShowAlert(false) } },
+
                       ],
                       { cancelable: false }
                     )
@@ -333,13 +344,13 @@ const getReact=async(react)=>{
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => addReact(item.post.id)}>
 
-   <Ionicons
-   style={{ marginLeft: 10 }}
-   name={item.isLiked?"heart":"heart-outline"}
-   size={25}
-   color={item.isLiked?"red":"black"}
- />
-   </TouchableOpacity>
+                    <Ionicons
+                      style={{ marginLeft: 10 }}
+                      name={item.isLiked ? "heart" : "heart-outline"}
+                      size={25}
+                      color={item.isLiked ? "red" : "black"}
+                    />
+                  </TouchableOpacity>
                   <TouchableOpacity onPress={() => onShare(item)}>
                     <Icon
                       style={{ marginLeft: 10 }}
@@ -363,7 +374,7 @@ const getReact=async(react)=>{
                       multiline={true}
                       placeholderTextColor={'black'}
                       style={{ borderWidth: 1, width: '80%' }} />
-                    <TouchableOpacity onPress={() => { addComment(item.post.id); setHide(null); setComment('');setReact(item.post.id) }} style={{ padding: 10, backgroundColor: 'blue', borderRadius: 10 }}>
+                    <TouchableOpacity onPress={() => { addComment(item.post.id); setHide(null); setComment(''); setReact(item.post.id) }} style={{ padding: 10, backgroundColor: 'blue', borderRadius: 10 }}>
                       <Text style={{ color: 'white' }}>Send</Text>
                     </TouchableOpacity>
                   </Row>
@@ -421,9 +432,9 @@ const getReact=async(react)=>{
               // navigation.navigate(screenName,{index}); // Navigate to the corresponding screen
               if (item == "BIIT") {
                 navigation.navigate(screenName, { index });
-               
+
               } else if (item == 'Student') {
-                getPost(1)
+                // getPost(1)
 
               }
               else if (item == 'Groups') {

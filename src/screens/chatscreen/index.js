@@ -9,28 +9,39 @@ import { mvs } from '../../config/metrices';
 import IP from '../IP';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { useIsFocused } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 // create a component
 const ChatScreen = ({ route, navigation }) => {
     const [search, setSearch] = useState('')
-
     const [data, setData] = useState([])
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState('');
     const item = route.params
 
-    console.log('itemmmm', item.id);
-    // console.log(global.user);
+    const [loginData, setLoginData] = useState([])
+    useEffect(() => {
+        getData()
+    }, [])
 
+    const getData = async () => {
+        try {
+            const data = await AsyncStorage.getItem('@user')
+            const jsonValue = data != null ? JSON.parse(data) : null;
+            setLoginData(jsonValue)
+            getGroups(jsonValue)
+        } catch (e) {
+            // error reading value
+        }
+    }
 
-    const getGroups = async () => {
+    const getGroups = async (user) => {
         var requestOptions = {
             method: 'GET',
             redirect: 'follow'
         };
-        console.log('global.user.userType', global.user)
-        await fetch(IP.IP + "groups/getChatOfGroup?id=" + item.id + "&loggedInUserId=" + global.user.CNIC, requestOptions)
+        await fetch(IP.IP + "groups/getChatOfGroup?id=" + item.id + "&loggedInUserId=" + user.CNIC, requestOptions)
             .then(response => response.json())
             .then(result => {
                 setData(result)
@@ -39,14 +50,15 @@ const ChatScreen = ({ route, navigation }) => {
 
             .catch(error => console.log('error>>>>>>>>>>>', error));
     }
+
     const onSend = () => {
         var formdata = new FormData();
-        formdata.append("userid", global.user.CNIC);
+        formdata.append("userid", loginData.CNIC);
         formdata.append("chat_id", item.id);
         formdata.append("dateTime",);
         formdata.append("text", inputText);
         formdata.append("image", "");
-        formdata.append("type", global.user.userType);
+        formdata.append("type", loginData.userType);
 
         var requestOptions = {
             method: 'POST',
@@ -54,18 +66,19 @@ const ChatScreen = ({ route, navigation }) => {
             redirect: 'follow'
         };
 
-        fetch(IP.IP+"chat/addChat", requestOptions)
+        fetch(IP.IP + "chat/addChat", requestOptions)
             .then(response => response.json())
             .then(result => console.log(result))
             .catch(error => console.log('error', error));
-    
- let d=[...data]
- d.push({message:inputText,sender:true})
- setData(d)
-            setInputText('');
-     
-    
+
+        let d = [...data]
+        d.push({ message: inputText, sender: true })
+        setData(d)
+        setInputText('');
+
+
     };
+
     const renderMessageItem = ({ item }) => {
         const messageStyle = item.sender ? styles.senderMessageContainer : styles.receiverMessageContainer;
         const textStyle = item.sender ? styles.senderMessageText : styles.receiverMessageText;
@@ -78,9 +91,6 @@ const ChatScreen = ({ route, navigation }) => {
     };
 
 
-    useEffect(() => {
-        getGroups();
-    }, [])
     return (
         <View style={styles.container}>
 
@@ -94,14 +104,14 @@ const ChatScreen = ({ route, navigation }) => {
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Icon name={'arrow-back'} size={25} color={colors.black} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={()=>navigation.navigate('GroupDetail',{item:item})}>
- <Row style={{}}>
-                    <Image source={require('../../assets/images/cover.png')} style={{ height: 60, width: 60, borderRadius: 30 }} />
-                    <View style={{ marginLeft: 16 }}>
-                        <Text style={{ color: colors.black, fontWeight: 'bold' }}>{item.name}</Text>
-                        <Text>CS7A</Text>
-                    </View>
-                </Row>
+                <TouchableOpacity onPress={() => navigation.navigate('GroupDetail', { item: item })}>
+                    <Row style={{}}>
+                        <Image source={require('../../assets/images/cover.png')} style={{ height: 60, width: 60, borderRadius: 30 }} />
+                        <View style={{ marginLeft: 16 }}>
+                            <Text style={{ color: colors.black, fontWeight: 'bold' }}>{item.name}</Text>
+                            <Text>CS7A</Text>
+                        </View>
+                    </Row>
                 </TouchableOpacity>
 
                 <Entypo
@@ -126,9 +136,9 @@ const ChatScreen = ({ route, navigation }) => {
             {/* Chat messages */}
             <FlatList
                 data={data}
-          
+
                 renderItem={renderMessageItem}
-                // keyExtractor={(item) => item.id.toString()}
+            // keyExtractor={(item) => item.id.toString()}
             />
 
             {/* Input container */}
@@ -193,28 +203,29 @@ const styles = StyleSheet.create({
     icon: {
         marginRight: 10,
     },
-    senderMessageContainer:{  alignSelf: 'flex-end',
-    backgroundColor: 'blue',
-    borderRadius: 8,
-    marginVertical: 4,
-    marginHorizontal: 8,
-    padding: 8,
-    maxWidth: '75%', 
+    senderMessageContainer: {
+        alignSelf: 'flex-end',
+        backgroundColor: 'blue',
+        borderRadius: 8,
+        marginVertical: 4,
+        marginHorizontal: 8,
+        padding: 8,
+        maxWidth: '75%',
     },
 
     senderMessageText: {
         color: 'white',
-   
+
     },
-    receiverMessageContainer: 
-        {
-            alignSelf: 'flex-start',
-            backgroundColor: '#ccc',
-            borderRadius: 8,
-            marginVertical: 4,
-            marginHorizontal: 8,
-            padding: 8,
-            maxWidth: '75%',
+    receiverMessageContainer:
+    {
+        alignSelf: 'flex-start',
+        backgroundColor: '#ccc',
+        borderRadius: 8,
+        marginVertical: 4,
+        marginHorizontal: 8,
+        padding: 8,
+        maxWidth: '75%',
     },
     receiverMessageText: {
         color: 'black',

@@ -1,5 +1,5 @@
 //import liraries
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -29,13 +29,33 @@ import Users from '../screens/users';
 import ClassScreen from '../screens/class';
 import GroupDetail from '../screens/Group-details/group-detail';
 import BottomTabBar from './bottom-tab/bottomTabBar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Splash from '../screens/Splash';
 
 const Stack = createNativeStackNavigator();
 
 function Navigators() {
+
+  const [logedIn, setLoggedIn] = useState(false);
+  useEffect(() => {
+    getData()
+  }, [])
+
+  const getData = async () => {
+    try {
+      const data = await AsyncStorage.getItem('@user')
+      const jsonValue = data != null ? JSON.parse(data) : null;
+      setLoggedIn(jsonValue !== null ? true : false)
+    } catch (e) {
+      // error reading value
+    }
+  }
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName='Login' screenOptions={{headerShown:false}}>
+      <Stack.Navigator
+        //</NavigationContainer> initialRouteName={logedIn ? 'Drawer' : 'Login'}
+        screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Splash" component={Splash} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="ForgetPassword" component={ForgetPassword} />
         <Stack.Screen name="OtpScreen" component={OtpScreen} />
@@ -64,11 +84,11 @@ function Navigators() {
 
 
 
-        
+
         {/* <Stack.Screen name="Drawer" component={MyDrawer} /> */}
         {/* <Stack.Screen name="Drawer" component={CustomDrawer} /> */}
-       
-      
+
+
       </Stack.Navigator>
     </NavigationContainer>
   );

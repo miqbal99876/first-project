@@ -9,6 +9,7 @@ import { Row } from '../../components/atoms/row';
 import { colors } from '../../config/colors';
 import IP from '../IP';
 import styles from './styles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 // create a component
@@ -33,7 +34,7 @@ const Login = ({ navigation }) => {
         "CNIC": email,
         "password": password
       });
-      
+
       var requestOptions = {
         method: 'POST',
         headers: myHeaders,
@@ -43,18 +44,24 @@ const Login = ({ navigation }) => {
 
       // console.log('IP.IP>>>>>', IP.IP);
 
-      await fetch(IP.IP +"User/LoginUser", requestOptions)
+      await fetch(IP.IP + "User/LoginUser", requestOptions)
         .then(response => response.json())
-        .then(result => { console.log(result);
-          if(result.statusCode==300)
-          {
+        .then(async (result) => {
+          console.log(result);
+          if (result.statusCode == 300) {
             alert(result.message)
             return
           }
-          global.user = result?.user;
-          global.result=result
+          try {
+            const jsonValue = JSON.stringify(result?.user)
+            await AsyncStorage.setItem('@user', jsonValue)
+            global.user = result?.user;
+            global.result = result
 
-          navigation.navigate('Drawer')
+            navigation.replace('Drawer')
+          } catch (e) {
+            // saving error
+          }
 
         })
         .catch(error => console.log('error>>>>>>>>>>>>>>>', error));
@@ -70,7 +77,7 @@ const Login = ({ navigation }) => {
       <View style={styles.innercontainer}>
 
         <Text style={styles.login}>Login</Text>
-        <ScrollView  style={styles.innercontent}>
+        <ScrollView style={styles.innercontent}>
           <Text style={styles.title}>Welcome!</Text>
           <Text style={styles.subtitle}>
             You Have Been {'\n'}Missed For Long Time

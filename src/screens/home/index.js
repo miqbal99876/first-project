@@ -1,6 +1,6 @@
 //import liraries
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, ScrollView, FlatList, Alert, } from 'react-native';
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, ScrollView, FlatList, Alert, Pressable, } from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -14,6 +14,7 @@ import IP from '../IP';
 import Video from 'react-native-video';
 import Share from 'react-native-share';
 import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
@@ -45,7 +46,6 @@ const Home = ({ navigation, route }) => {
   const currentTime = `${hours}:${minutes}:${seconds}`;
   const year1 = `${day}/${month}/${year}`
 
-  console.log('current user ', global.user);
   console.log(year1);
   const screenMapping = {
     'BIIT': 'BiitScreen',
@@ -55,24 +55,34 @@ const Home = ({ navigation, route }) => {
     'Class': 'ClassScreen',
 
   };
-useFocusEffect(
-useCallback(() => {
-    // console.log(IP);
-    getPost();
-    getReact();
+  const [loginData, setLoginData] = useState([])
+  useFocusEffect(
+    useCallback(() => {
+      getData();
+      getReact();
 
-    // removeReact();
-  }, [refresh])
-)
+      // removeReact();
+    }, [refresh])
+  )
+  const getData = async () => {
+    try {
+      const data = await AsyncStorage.getItem('@user')
+      const jsonValue = data != null ? JSON.parse(data) : null;
+      setLoginData(jsonValue)
+      getPost(jsonValue?.CNIC, jsonValue.userType);
+    } catch (e) {
+      // error reading value
+    }
+  }
 
-  const getPost = async () => {
-    id=global.user.userType
-  var requestOptions = {
+  const getPost = async (cnic, userType) => {
+    // id = userType
+    var requestOptions = {
       method: 'GET',
       redirect: 'follow'
     };
-    console.log(global?.user?.CNIC);
-    await fetch(IP.IP + "post/getPosts?cnic=" +global.user?.CNIC + "&pageNumber=1&fromWall=" + id, requestOptions)
+
+    await fetch(IP.IP + "post/getPosts?cnic=" + cnic + "&pageNumber=1&fromWall=3", requestOptions)
       .then(response => response.json())
       .then(result => {
         console.log('posts result ', result);
@@ -89,13 +99,14 @@ useCallback(() => {
 
       .catch(error => console.log('error', error));
   }
+
   const addReact = (id) => {
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
     var raw = JSON.stringify({
       "postId": id,
-      "userid": global?.user?.CNIC,
+      "userid": loginData?.CNIC,
       "emogie": "like"
     });
 
@@ -128,7 +139,7 @@ useCallback(() => {
     myHeaders.append("Content-Type", "application/json");
 
     var raw = JSON.stringify({
-      "userId": global.user.cnic,
+      "userId": loginData?.cnic,
       "postId": id,
       "dateTime": year1,
       "repliedOn": 82,
@@ -220,7 +231,7 @@ useCallback(() => {
     <View style={styles.container}>
       <HomeHeader navigation={navigation} />
 
-      <Row style={styles.search}>
+      {loginData?.userType == 3 && <Row style={styles.search}>
         <Image
           source={require('../../assets/coffees/imag2.jpg')}
           style={styles.searchimg}
@@ -240,29 +251,21 @@ useCallback(() => {
           style={styles.iconContainer}>
           <Ionicons name="person-add" size={24} color="black" />
         </TouchableOpacity>
-      </Row>
+      </Row>}
       {/* post */}
+      <TouchableOpacity
+      onPress={()=>{
+        navigation.navigate('CalendarScreen')
+      }}
+      style={{ backgroundColor: colors.black, alignSelf: 'center' }}>
+        <Text style={{ color: colors.white, padding: 10 }}>{`Calender`}</Text>
+      </TouchableOpacity>
       <FlatList
         data={data}
         renderItem={({ item }) => {
-          // console.log('this dat',item?.post?.type==="text")
-          // console.log('itemm',item.post.likesCount);
-
-          // console.log(item.post.name)
-
-          console.log('postId>>>>>>>>>', item.post.id);
-
-
-          //   ?item?.post?.user 
-          //  :JSON.parse(item?.post?.user)
           const user = JSON.parse(item?.post?.user)
-          console.log('userrrrrr', user?.name)
           const dateTimeString = item?.post?.dateTime
           const dateOnly = dateTimeString.split(" ")[0];
-
-          console.log(dateOnly);
-
-
           return (
             <View
               style={{

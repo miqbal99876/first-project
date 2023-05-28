@@ -23,7 +23,7 @@
 //       method: 'GET',
 //       redirect: 'follow'
 //     };
-    
+
 //     fetch("http://192.168.0.116/BiitSocioApis/api/post/getTimeTable?section=BCS-8C&userType=1", requestOptions)
 //       .then(response => response.json())
 //       .then(result => {
@@ -38,10 +38,10 @@
 //   }
 
 //   useEffect(() => {
-  
+
 //     gettimeTable();
 
-   
+
 //   }, []);
 
 //   return (
@@ -51,9 +51,9 @@
 //         <View key={lecture.id} style={{flexDirection:'row'}}>
 //           <Text>Slot: {lecture.slot}</Text>
 
-          
+
 //           <Text> {lecture.friday}</Text> 
-          
+
 //         </View>
 //       ))}
 //     </View>
@@ -76,11 +76,12 @@ import PrimaryInput from '../../components/atoms/inputs';
 import IP from '../IP';
 import Video from 'react-native-video';
 import Share from 'react-native-share';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
 // create a component
-const Class = ({ navigation,route }) => {
+const Class = ({ navigation, route }) => {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(1);
   const [hide, setHide] = useState(null)
@@ -89,10 +90,10 @@ const Class = ({ navigation,route }) => {
   const [data, setData] = useState([]);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
-  const [showAlert, setShowAlert] = useState(false); 
-  const [react, setReact] = useState(''); 
-  const[likes,setLikes]=useState([])
-  const[filter,setFilter]=useState([])
+  const [showAlert, setShowAlert] = useState(false);
+  const [react, setReact] = useState('');
+  const [likes, setLikes] = useState([])
+  const [filter, setFilter] = useState([])
 
   const currentDate = new Date();
 
@@ -107,55 +108,68 @@ const Class = ({ navigation,route }) => {
   const currentTime = `${hours}:${minutes}:${seconds}`;
   const year1 = `${day}/${month}/${year}`
 
-  console.log('current user ',global.user);
   console.log(year1);
- const screenMapping = {
+  const screenMapping = {
     'BIIT': 'BiitScreen',
     'Personal': 'Personal',
     'Societies': 'SocietiesScreen',
     'Calendar': 'CalendarScreen',
     'Class': 'ClassScreen',
-   
+
   };
+
+  const [loginData, setLoginData] = useState([])
+  useEffect(() => {
+    getData()
+  }, [])
+
+  const getData = async () => {
+    try {
+      const data = await AsyncStorage.getItem('@user')
+      const jsonValue = data != null ? JSON.parse(data) : null;
+      setLoginData(jsonValue)
+    } catch (e) {
+      // error reading value
+    }
+  }
+
   useEffect(() => {
     // console.log(IP);
     getPost();
     getReact();
-  
+
     // removeReact();
   }, [refresh])
-  const getPost = async (id=3) => {
- 
-
+  const getPost = async (id = 3) => {
     var requestOptions = {
       method: 'GET',
       redirect: 'follow'
     };
-    console.log(global?.user?.CNIC);
-    await fetch(IP.IP + "post/getPosts?cnic="+global.user.CNIC+ "&pageNumber=1&fromWall=" +id, requestOptions)
+    await fetch(IP.IP + "post/getPosts?cnic=" + loginData?.CNIC + "&pageNumber=1&fromWall=5", requestOptions)
       .then(response => response.json())
       .then(result => {
         console.log('posts result ', result);
-        if(result=='No more posts'){
+        if (result == 'No more posts') {
           return Alert.alert('No more posts')
         }
         else if (result == "Something went wrong try Again!") {
           setData([])
         } else {
           setData(result);
-          global.post=result
+          global.post = result
         }
       })
 
       .catch(error => console.log('error', error));
   }
+
   const addReact = (id) => {
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
     var raw = JSON.stringify({
       "postId": id,
-      "userid": global?.user?.CNIC,
+      "userid": loginData?.CNIC,
       "emogie": "like"
     });
 
@@ -168,7 +182,7 @@ const Class = ({ navigation,route }) => {
 
     fetch(IP.IP + "Reacts/addReaction", requestOptions)
       .then(response => response.json())
-      .then(result =>{ console.log('result>>>>>>>>', result);getReact(id);setRefresh(true)})
+      .then(result => { console.log('result>>>>>>>>', result); getReact(id); setRefresh(true) })
       .catch(error => console.log('error', error));
   }
 
@@ -178,9 +192,9 @@ const Class = ({ navigation,route }) => {
       redirect: 'follow'
     };
 
-    fetch(IP.IP + "Post/deletePost?post_id=" +id, requestOptions)
+    fetch(IP.IP + "Post/deletePost?post_id=" + id, requestOptions)
       .then(response => response.json())
-      .then(result => {setRefresh(!refresh)})
+      .then(result => { setRefresh(!refresh) })
       .catch(error => console.log('error', error));
   }
   const addComment = (id) => {
@@ -188,7 +202,7 @@ const Class = ({ navigation,route }) => {
     myHeaders.append("Content-Type", "application/json");
 
     var raw = JSON.stringify({
-      "userId": global.user.cnic,
+      "userId": loginData.cnic,
       "postId": id,
       "dateTime": year1,
       "repliedOn": 82,
@@ -222,7 +236,7 @@ const Class = ({ navigation,route }) => {
       redirect: 'follow'
     };
 
-    fetch(IP.IP + "comments/getComment?post_id=" +id, requestOptions)
+    fetch(IP.IP + "comments/getComment?post_id=" + id, requestOptions)
       .then(response => response.json())
       .then(result => {
         console.log('result>>>>>>>>>', result);
@@ -265,28 +279,28 @@ const Class = ({ navigation,route }) => {
     );
   }
 
-const getReact=async(react)=>{
-  var requestOptions = {
-    method: 'GET',
-    redirect: 'follow'
-  };
-  
-  fetch(IP.IP+"Reacts/getReactions?post_id="+react, requestOptions)
-    .then(response =>response.json())
-    .then(result => {console.log('get reaction>>>>>>>>',result);setRefresh(true)})
-    .catch(error => console.log('error', error));
-}
+  const getReact = async (react) => {
+    var requestOptions = {
+      method: 'GET',
+      redirect: 'follow'
+    };
+
+    fetch(IP.IP + "Reacts/getReactions?post_id=" + react, requestOptions)
+      .then(response => response.json())
+      .then(result => { console.log('get reaction>>>>>>>>', result); setRefresh(true) })
+      .catch(error => console.log('error', error));
+  }
 
 
 
-const filteredPosts = data.filter(post => console.log('admin posts',post));
-console.log('filteredPosts>>>>>>>>>>',filteredPosts);
+  const filteredPosts = data.filter(post => console.log('admin posts', post));
+  console.log('filteredPosts>>>>>>>>>>', filteredPosts);
 
   return (
     <View style={styles.container}>
       <HomeHeader navigation={navigation} />
 
-      <Row style={styles.search}>
+      {loginData?.userType == 5 && <Row style={styles.search}>
         <Image
           source={require('../../assets/coffees/imag2.jpg')}
           style={styles.searchimg}
@@ -298,7 +312,7 @@ console.log('filteredPosts>>>>>>>>>>',filteredPosts);
           value={search}
           onChangeText={str => setSearch(str)}
         />
-        <TouchableOpacity onPress={() => navigation.navigate('NewPost',{data:'Class'})}>
+        <TouchableOpacity onPress={() => navigation.navigate('NewPost', { data: 'Class' })}>
           <Ionicons name="camera-outline" size={50} color={colors.border} />
         </TouchableOpacity>
         <TouchableOpacity
@@ -306,7 +320,7 @@ console.log('filteredPosts>>>>>>>>>>',filteredPosts);
           style={styles.iconContainer}>
           <Ionicons name="person-add" size={24} color="black" />
         </TouchableOpacity>
-      </Row>
+      </Row>}
       {/* post */}
       <FlatList
         data={data}
@@ -315,18 +329,18 @@ console.log('filteredPosts>>>>>>>>>>',filteredPosts);
           // console.log('itemm',item.post.likesCount);
 
           // console.log(item.post.name)
-         
-          console.log('postId>>>>>>>>>',item.post.id);
 
-          
+          console.log('postId>>>>>>>>>', item.post.id);
+
+
           //   ?item?.post?.user 
           //  :JSON.parse(item?.post?.user)
-          const user =JSON.parse(item?.post?.user)
-           console.log('userrrrrr',user?.name)
-           const dateTimeString =item?.post?.dateTime
-           const dateOnly = dateTimeString.split(" ")[0];
-           
-           console.log(dateOnly);
+          const user = JSON.parse(item?.post?.user)
+          console.log('userrrrrr', user?.name)
+          const dateTimeString = item?.post?.dateTime
+          const dateOnly = dateTimeString.split(" ")[0];
+
+          console.log(dateOnly);
 
 
           return (
@@ -346,7 +360,7 @@ console.log('filteredPosts>>>>>>>>>>',filteredPosts);
                   justifyContent: 'space-between',
                 }}>
                 <Row style={{ alignItems: 'center' }}>
-             
+
                   <Image
                     // source={{uri:IP.path+'Images/'+user?.profileImage}}
                     source={require('../../assets/images/eid.png')}
@@ -374,8 +388,8 @@ console.log('filteredPosts>>>>>>>>>>',filteredPosts);
                           onPress: () => setShowAlert(false),
                           style: 'cancel'
                         },
-                        { text: 'OK', onPress: () => {deletePost(item.post.id);setShowAlert(false)}},
-                     
+                        { text: 'OK', onPress: () => { deletePost(item.post.id); setShowAlert(false) } },
+
                       ],
                       { cancelable: false }
                     )
@@ -431,13 +445,13 @@ console.log('filteredPosts>>>>>>>>>>',filteredPosts);
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => addReact(item.post.id)}>
 
-   <Ionicons
-   style={{ marginLeft: 10 }}
-   name={item.isLiked?"heart":"heart-outline"}
-   size={25}
-   color={item.isLiked?"red":"black"}
- />
-   </TouchableOpacity>
+                    <Ionicons
+                      style={{ marginLeft: 10 }}
+                      name={item.isLiked ? "heart" : "heart-outline"}
+                      size={25}
+                      color={item.isLiked ? "red" : "black"}
+                    />
+                  </TouchableOpacity>
                   <TouchableOpacity onPress={() => onShare(item)}>
                     <Icon
                       style={{ marginLeft: 10 }}
@@ -461,7 +475,7 @@ console.log('filteredPosts>>>>>>>>>>',filteredPosts);
                       multiline={true}
                       placeholderTextColor={'black'}
                       style={{ borderWidth: 1, width: '80%' }} />
-                    <TouchableOpacity onPress={() => { addComment(item.post.id); setHide(null); setComment('');setReact(item.post.id) }} style={{ padding: 10, backgroundColor: 'blue', borderRadius: 10 }}>
+                    <TouchableOpacity onPress={() => { addComment(item.post.id); setHide(null); setComment(''); setReact(item.post.id) }} style={{ padding: 10, backgroundColor: 'blue', borderRadius: 10 }}>
                       <Text style={{ color: 'white' }}>Send</Text>
                     </TouchableOpacity>
                   </Row>
@@ -519,7 +533,7 @@ console.log('filteredPosts>>>>>>>>>>',filteredPosts);
               // navigation.navigate(screenName,{index}); // Navigate to the corresponding screen
               if (item == "BIIT") {
                 navigation.navigate(screenName, { index });
-               
+
               } else if (item == 'Student') {
                 getPost(1)
 
